@@ -25,7 +25,7 @@ P2MAT is a GUI that enable user to input SMILEs strings of chemical compounds to
 
 ### Environment
 
-This python based software requires python `>=12.3`
+This python based software requires python `>=12.3`, `Xcode` and, `java runtime environment`.
 
 #### Conda
 
