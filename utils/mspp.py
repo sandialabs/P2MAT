@@ -1,20 +1,31 @@
 import pandas as pd
 import numpy as np
 from utils.smile import *
+from utils import helper
 from rdkit import Chem
-from rdkit.Chem import AllChem
+#from rdkit.Chem import AllChem
 from utils.depictsmile import DepictSmile
+from utils.descriptor import Descriptor
 import os
 import warnings
+import sklearn
+from sklearn import pipeline
+#from sklearn.model_selection import train_test_split, KFold, GridSearchCV
+#from sklearn import metrics
+from xgboost import XGBRegressor
+import joblib
 warnings.filterwarnings('ignore')
 pd.options.mode.chained_assignment=None
 
 class MaterialStructuralPropertyPrediction:
-    def __init__(self, pkg_dir, props={"MP":True, "BP":False, "HC":False, "dH":False, "h2_uptake":False}, imgpath=None, batch=128, verbose=0):
-        print(f"pkg_dir={pkg_dir}")
+    def __init__(self, props={"MP":True, "BP":False, "HC":False, "dH":False, "h2_uptake":False}, imgpath=None, batch=128, verbose=0):
         self.__smile__ = SMILE(verbose)
-        self.__model_path__= self.__create_path__(f'{pkg_dir}/include/best_models/')
-        self.__feature_path__= self.__create_path__(f'{pkg_dir}/include/feature/')
+        self.__model_path__= helper.resource_path(os.path.join("include", "best_models"))
+        self.__feature_path__= helper.resource_path(os.path.join("include", "feature"))
+
+        #print(f"Model path: {self.__model_path__}")
+        #print(f"Feature path: {self.__feature_path__}")
+
         self.__batch__ = batch
         self.__verbose__ = verbose
         self.__plot_smile__ = None
@@ -53,8 +64,10 @@ class MaterialStructuralPropertyPrediction:
             print(f"[{si}, {ei}] processing.")
             
         try:
-            descriptors = pd.DataFrame(from_smiles(v_smile[si:ei]))
+            desc = Descriptor()
+            descriptors = pd.DataFrame(desc.from_smiles(v_smile[si:ei]))
             descriptors['smiles'] = v_smile[si:ei]
+            del [desc]
             
             if self.df_mol is None:
                 self.df_mol = pd.DataFrame(descriptors)
@@ -66,6 +79,9 @@ class MaterialStructuralPropertyPrediction:
             
         except Exception as e:
             print(f"Error processing [{si}-{ei}]: {e}.")
+
+            if si+1==ei:
+                return
             
             mi = si + (ei-si)//2
             self.__download_features__(v_smile, si, mi)
@@ -76,7 +92,8 @@ class MaterialStructuralPropertyPrediction:
                 if self.__verbose__>0:
                     print(f"{mi} processing.")
                     
-                descriptors = pd.DataFrame([from_smiles(v_smile[mi])])
+                row = from_smiles(v_smile[mi])
+                descriptors = pd.DataFrame([row])
                 descriptors['smiles'] = v_smile[mi]
 
                 if self.df_mol is None:
@@ -94,10 +111,10 @@ class MaterialStructuralPropertyPrediction:
             self.__download_features__(v_smile, mi+1, ei)
             if self.__verbose__>0:
                 print(f"[{mi+1}, {ei}] done.")
-        
-    
+
+
     def __get_features__(self, v_smile):
-        df_mol = None
+        self.df_mol = None
         
         if len(v_smile)>0:
             si = 0
@@ -142,29 +159,45 @@ class MaterialStructuralPropertyPrediction:
                 '''
             
         # Replace missing values to 0
-        for c in self.df_mol.columns:
-            if c != 'smiles':
-                self.df_mol.loc[self.df_mol[c]=='', c] = '0.0'
-                self.df_mol[c] = self.df_mol[c].astype(np.float32)
+        if isinstance(self.df_mol, pd.DataFrame):
+            for c in self.df_mol.columns:
+                if c != 'smiles':
+                    self.df_mol.loc[self.df_mol[c]=='', c] = '0.0'
+                    self.df_mol[c] = self.df_mol[c].astype(np.float32)
+
+    def __validate_features__(self, df):
+        # Replace inf and -inf with NaN first, then handle NaN
+        df.replace([np.inf, -np.inf], np.nan, inplace=True)
+        # Then replace NaN values with 0, for example
+        df.fillna(0, inplace=True)
     
     def __predict_MP__(self):
         model=None
         try:
-            model = joblib.load(os.path.join(self.__model_path__, 'MP/bestmodel_LBNL.sav'))
+            model_path = os.path.join(self.__model_path__, 'MP', 'bestmodel_LBNL.sav')
+            #print(f"Loading MP model from: {model_path}")
+            model = joblib.load(model_path)
         except Exception as e:
-            print(f"Error to load model: {e}")
+            print(f"Error to load MP model: {e}")
                 
         if model is None:
             return None
         
-        features = self.__read_features__(os.path.join(self.__feature_path__, 'MP_features.txt'))
+        feature_path = os.path.join(self.__feature_path__, 'MP_features.txt')
+        #print(f"Loading MP features from: {feature_path}")
+        features = self.__read_features__(feature_path)
         if len(features)==0:
             return None
         
-        fv = self.df_mol.loc[:, features]
-        if fv is None:
+        if isinstance(self.df_mol, pd.DataFrame):
+            fv = self.df_mol.loc[:, features]
+            if fv is None:
+                return None
+        else:
             return None
             
+        self.__validate_features__(fv)
+        
         try:
             pv = model.predict(fv)
         except Exception as e:
@@ -176,7 +209,7 @@ class MaterialStructuralPropertyPrediction:
     def __predict_BP__(self):
         model=None
         try:
-            model = joblib.load(os.path.join(self.__model_path__, 'BP/bestmodel.sav'))
+            model = joblib.load(os.path.join(self.__model_path__, 'BP', 'bestmodel.sav'))
         except Exception as e:
             print(f"Error to load model: {e}")
                 
@@ -187,10 +220,15 @@ class MaterialStructuralPropertyPrediction:
         if len(features)==0:
             return None
         
-        fv = self.df_mol.loc[:, features]
-        if fv is None:
+        if isinstance(self.df_mol, pd.DataFrame):
+            fv = self.df_mol.loc[:, features]
+            if fv is None:
+                return None
+        else:
             return None
             
+        self.__validate_features__(fv)
+        
         try:
             pv = model.predict(fv)
         except Exception as e:
@@ -202,7 +240,7 @@ class MaterialStructuralPropertyPrediction:
     def __predict_HC__(self):
         model=None
         try:
-            model = joblib.load(os.path.join(self.__model_path__, 'HC/bestmodel.sav'))
+            model = joblib.load(os.path.join(self.__model_path__, 'HC', 'bestmodel.sav'))
         except Exception as e:
             print(f"Error to load model: {e}")
                 
@@ -213,10 +251,15 @@ class MaterialStructuralPropertyPrediction:
         if len(features)==0:
             return None
         
-        fv = self.df_mol.loc[:, features]
-        if fv is None:
+        if isinstance(self.df_mol, pd.DataFrame):
+            fv = self.df_mol.loc[:, features]
+            if fv is None:
+                return None
+        else:
             return None
             
+        self.__validate_features__(fv)
+        
         try:
             pv = model.predict(fv)
         except Exception as e:
@@ -228,7 +271,7 @@ class MaterialStructuralPropertyPrediction:
     def __predict_HH__(self):
         model=None
         try:
-            model = joblib.load(os.path.join(self.__model_path__, 'HH/bestmodel.sav'))
+            model = joblib.load(os.path.join(self.__model_path__, 'HH' ,'bestmodel.sav'))
         except Exception as e:
             print(f"Error to load model: {e}")
                 
@@ -239,10 +282,15 @@ class MaterialStructuralPropertyPrediction:
         if len(features)==0:
             return None
         
-        fv = self.df_mol.loc[:, features]
-        if fv is None:
+        if isinstance(self.df_mol, pd.DataFrame):
+            fv = self.df_mol.loc[:, features]
+            if fv is None:
+                return None
+        else:
             return None
             
+        self.__validate_features__(fv)
+        
         try:
             pv = model.predict(fv)
         except Exception as e:
