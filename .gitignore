@@ -1,0 +1,48 @@
+# ─── macOS ────────────────────────────────────────────────────────────────────
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+Icon?
+
+# ─── Python ───────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+bundle_stack*.py
+
+# ─── Jupyter ──────────────────────────────────────────────────────────────────
+.ipynb_checkpoints/
+
+# ─── Virtual environments / conda ─────────────────────────────────────────────
+.env
+.venv
+env/
+venv/
+
+# ─── IDE ──────────────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ─── Claude Code ──────────────────────────────────────────────────────────────
+.claude/
+
+# ─── Logs ─────────────────────────────────────────────────────────────────────
+*.log
+
+# ─── Old non-domain-split model files (superseded by _cho/_chon/_full versions) ─
+P2MAT/include/best_models/BP/bestmodel_stack.sav
+P2MAT/include/best_models/MP/bestmodel_stack.sav
