@@ -42,8 +42,8 @@ MinVersion=10.0.18362
 PrivilegesRequired=lowest
 PrivilegesRequiredOverridesAllowed=commandline
 WizardStyle=modern
-; SetupIconFile={#SourceDir}\icon.ico  ; requires a .ico file — provide icon.ico in the P2MAT source folder to enable
-UninstallDisplayIcon={app}\icon.icns
+SetupIconFile={#SourceDir}\icon.ico
+UninstallDisplayIcon={app}\icon.ico
 ShowLanguageDialog=no
 ChangesEnvironment=yes
 
@@ -61,9 +61,9 @@ Source: "..\..\QSAR.yml"; DestDir: "{tmp}"; Flags: ignoreversion
 Source: "{#InstallerPS}"; DestDir: "{tmp}"; Flags: ignoreversion
 
 [Icons]
-Name: "{group}\{#AppName}"; Filename: "{app}\{#AppExeName}"; WorkingDir: "{app}"
+Name: "{group}\{#AppName}"; Filename: "{app}\{#AppExeName}"; WorkingDir: "{app}"; IconFilename: "{app}\icon.ico"
 Name: "{group}\Uninstall {#AppName}"; Filename: "{uninstallexe}"
-Name: "{autodesktop}\{#AppName}"; Filename: "{app}\{#AppExeName}"; WorkingDir: "{app}"; Tasks: desktopicon
+Name: "{autodesktop}\{#AppName}"; Filename: "{app}\{#AppExeName}"; WorkingDir: "{app}"; IconFilename: "{app}\icon.ico"; Tasks: desktopicon
 
 [Run]
 ; Run the PowerShell installer to set up Java, Miniconda, conda env, and shortcuts
