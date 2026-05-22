@@ -71,13 +71,13 @@ cd windows && bash build_zip.sh
 
 Both produce `P2MAT-v1.0.0-Windows.zip`. End users extract and right-click `Install-P2MAT.ps1` → **Run with PowerShell**.
 
-**Inno Setup .exe — Windows build machine:**
+**Inno Setup .exe — Windows build machine** *(requires [Inno Setup 6.x](https://jrsoftware.org/isinfo.php))*:
 ```batch
 cd windows
-xcopy /E /I ..\..\P2MAT P2MAT
+xcopy /E /I /Y ..\..\P2MAT P2MAT
 iscc P2MAT.iss
 ```
-Produces `P2MAT-v1.0.0-Windows-x64-Setup.exe`. End users double-click and follow the wizard.
+Produces `P2MAT-v1.0.0-Windows-x64-Setup.exe`. End users double-click and follow the wizard. See [Section 4.1](#41-building-the-windows-package) for full details.
 
 ### Linux
 
@@ -207,7 +207,59 @@ P2MAT will open and is now permanently allowed.
 
 ## 4. Windows Installation
 
-### 4.1 Install from the ZIP archive (recommended)
+### 4.1 Building the Windows package
+
+#### Option A — ZIP archive (recommended, build on macOS or Windows)
+
+**On macOS / Linux:**
+```bash
+cd windows
+bash build_zip.sh
+```
+
+**On Windows (PowerShell):**
+```powershell
+cd windows
+powershell -ExecutionPolicy Bypass -File build_zip.ps1
+```
+
+Both produce `P2MAT-v1.0.0-Windows.zip`. The build script:
+- Copies the `P2MAT\` source (excluding `__pycache__` and `.pyc` files)
+- Copies `QSAR.yml`
+- Converts `icon.icns` → `icon.ico` and places it inside `P2MAT\` (macOS build) or converts `logo\logo.png` → `icon.ico` (Windows build)
+- Creates a `README.txt`
+- Zips everything into a single distributable archive
+
+Distribute the ZIP to end users — they extract and run `Install-P2MAT.ps1`.
+
+#### Option B — Windows .exe wizard (build on Windows only)
+
+**Prerequisites:**
+
+- [Inno Setup 6.x](https://jrsoftware.org/isinfo.php) installed on the build machine
+- The `iscc` command available on `PATH` (added automatically by the Inno Setup installer)
+
+**Build steps:**
+
+```batch
+cd windows
+
+REM Copy the P2MAT source folder next to the .iss script
+xcopy /E /I /Y ..\..\P2MAT P2MAT
+
+REM Compile the installer
+iscc P2MAT.iss
+```
+
+The `xcopy` step is required because Inno Setup reads `P2MAT\` relative to where `P2MAT.iss` is located. `icon.ico` is already present in the source folder and is automatically included.
+
+Output: `P2MAT-v1.0.0-Windows-x64-Setup.exe` (~same folder). This single `.exe` bundles the application, runs the PowerShell installer internally, and provides an uninstaller registered in **Settings → Apps**.
+
+Distribute this `.exe` to end users as a self-contained wizard installer.
+
+---
+
+### 4.2 Install from the ZIP archive (recommended)
 
 1. **Extract the archive** — right-click `P2MAT-v1.0.0-Windows.zip` → **Extract All** → choose a location → click **Extract**.
 
@@ -262,7 +314,7 @@ P2MAT will open and is now permanently allowed.
 5. When the installer finishes it prints **"Installation complete!"** and waits
    for you to press ENTER before closing.
 
-### 4.2 Install from the .exe wizard
+### 4.3 Install from the .exe wizard
 
 If you received a file named `P2MAT-v1.0.0-Windows-x64-Setup.exe`:
 
@@ -274,7 +326,7 @@ If you received a file named `P2MAT-v1.0.0-Windows-x64-Setup.exe`:
    on-screen prompts. The process takes 10–20 minutes.
 5. Click **Finish** when done.
 
-### 4.3 Launch P2MAT
+### 4.4 Launch P2MAT
 
 Double-click the **P2MAT** shortcut on your Desktop, or open the Start Menu
 and search for **P2MAT**.
