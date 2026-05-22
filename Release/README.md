@@ -148,21 +148,32 @@ P2MAT will open and is now permanently allowed.
 
 ### 3.1 Build the Windows package
 
-Two distribution formats are available. Choose whichever is easier for your workflow.
+Two distribution formats are available. Choose whichever suits your workflow.
 
-**ZIP archive (simpler)** — assemble the following folder and zip it into `P2MAT-v1.0.0-Windows.zip`:
+**ZIP archive — run on macOS or Linux (recommended)**
+
+**Prerequisite:** `zip` must be available (`brew install zip` on macOS if missing).
+
+```bash
+cd windows
+bash build_zip.sh
+```
+
+The script checks for an existing ZIP, removes it, then assembles and compresses:
 
 ```
-P2MAT-v1.0.0-Windows\
-├── P2MAT\                  ← application source and ML models
+P2MAT-v1.0.0-Windows/
+├── P2MAT/                  ← application source and ML models
 ├── QSAR.yml                ← conda environment definition
 ├── Install-P2MAT.ps1       ← installer script
-└── README.txt
+└── README.txt              ← generated automatically by the script
 ```
 
-Distribute the `.zip` to end users → they follow [section 3.2](#32-install-from-the-zip-archive-recommended).
+Output: `Release/windows/P2MAT-v1.0.0-Windows.zip`. Distribute this file to end users → they follow [section 3.2](#32-install-from-the-zip-archive-recommended).
 
-**Inno Setup `.exe` wizard** — requires [Inno Setup 6](https://jrsoftware.org/isinfo.php) on a Windows machine. Stage the `P2MAT\` source folder first, then build:
+**Inno Setup `.exe` wizard — requires a Windows machine with [Inno Setup 6](https://jrsoftware.org/isinfo.php)**
+
+Stage the `P2MAT\` source folder first, then build:
 
 ```batch
 cd windows
@@ -170,7 +181,7 @@ xcopy /E /I ..\..\P2MAT P2MAT
 iscc P2MAT.iss
 ```
 
-Output: `Release\windows\P2MAT-v1.0.0-Windows-x64-Setup.exe`. Distribute this single file to end users → they follow [section 3.3](#33-install-from-the-exe-wizard).
+Output: `Release\windows\P2MAT-v1.0.0-Windows-x64-Setup.exe`. Distribute this file to end users → they follow [section 3.3](#33-install-from-the-exe-wizard).
 
 ### 3.2 Install from the ZIP archive (recommended)
 
@@ -524,9 +535,15 @@ iscc P2MAT.iss
 
 Output: `P2MAT-v1.0.0-Windows-x64-Setup.exe`.
 
-Alternatively, distribute `P2MAT-v1.0.0-Windows.zip` (the `windows/` folder
-zipped with the `P2MAT/` source, `QSAR.yml`, and `Install-P2MAT.ps1`). Users run
-the PowerShell script directly without needing the Inno Setup `.exe`.
+To build the ZIP archive instead, run on macOS or Linux:
+
+```bash
+cd windows
+bash build_zip.sh
+```
+
+Output: `P2MAT-v1.0.0-Windows.zip`. Users extract it and run `Install-P2MAT.ps1`
+directly without needing the Inno Setup `.exe`.
 
 ### Build the Linux tarball
 
@@ -550,5 +567,6 @@ Update the `VERSION` variable in all six files:
 | `Release/macOS/build_dmg.sh` | `VERSION="1.0.0"` |
 | `Release/windows/Install-P2MAT.ps1` | `$VERSION = "1.0.0"` |
 | `Release/windows/P2MAT.iss` | `#define AppVersion "1.0.0"` |
+| `Release/windows/build_zip.sh` | `VERSION="1.0.0"` |
 | `Release/linux/install.sh` | `VERSION="1.0.0"` |
 | `Release/linux/build_tarball.sh` | `VERSION="1.0.0"` |
