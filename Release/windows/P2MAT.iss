@@ -42,8 +42,8 @@ MinVersion=10.0.18362
 PrivilegesRequired=lowest
 PrivilegesRequiredOverridesAllowed=commandline
 WizardStyle=modern
-SetupIconFile={#SourceDir}\icon.ico
-UninstallDisplayIcon={app}\icon.png
+; SetupIconFile={#SourceDir}\icon.ico  ; requires a .ico file — provide icon.ico in the P2MAT source folder to enable
+UninstallDisplayIcon={app}\icon.icns
 ShowLanguageDialog=no
 ChangesEnvironment=yes
 
@@ -54,14 +54,11 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "Create a &desktop shortcut"; GroupDescription: "Additional icons:"; Flags: unchecked
 
 [Files]
-; Application source (includes models in include/)
-Source: "{#SourceDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: "__pycache__,*.pyc"
-
-; Conda environment definition
-Source: "..\..\QSAR.yml"; DestDir: "{app}"; Flags: ignoreversion
-
-; The PowerShell installer — extracted alongside the app for reference
-Source: "{#InstallerPS}"; DestDir: "{app}"; Flags: ignoreversion
+; Stage source into {tmp} so Install-P2MAT.ps1 can copy to its final location
+; ({tmp} is cleaned up automatically after the installer exits)
+Source: "{#SourceDir}\*"; DestDir: "{tmp}\P2MAT"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: "__pycache__,*.pyc"
+Source: "..\..\QSAR.yml"; DestDir: "{tmp}"; Flags: ignoreversion
+Source: "{#InstallerPS}"; DestDir: "{tmp}"; Flags: ignoreversion
 
 [Icons]
 Name: "{group}\{#AppName}"; Filename: "{app}\{#AppExeName}"; WorkingDir: "{app}"
@@ -69,12 +66,13 @@ Name: "{group}\Uninstall {#AppName}"; Filename: "{uninstallexe}"
 Name: "{autodesktop}\{#AppName}"; Filename: "{app}\{#AppExeName}"; WorkingDir: "{app}"; Tasks: desktopicon
 
 [Run]
-; Run the PowerShell installer to set up Miniconda, conda env, and shortcuts
+; Run the PowerShell installer to set up Java, Miniconda, conda env, and shortcuts
+; WorkingDir is {tmp} so Install-P2MAT.ps1 finds its P2MAT\ subfolder there
 Filename: "powershell.exe"; \
-    Parameters: "-ExecutionPolicy Bypass -NoProfile -File ""{app}\Install-P2MAT.ps1"""; \
-    WorkingDir: "{app}"; \
-    Flags: runhidden waituntilterminated; \
-    StatusMsg: "Setting up Python environment (this may take 10–20 minutes)..."; \
+    Parameters: "-ExecutionPolicy Bypass -NoProfile -File ""{tmp}\Install-P2MAT.ps1"""; \
+    WorkingDir: "{tmp}"; \
+    Flags: waituntilterminated; \
+    StatusMsg: "Setting up Python environment (this may take 10-20 minutes)..."; \
     Description: "Set up Python environment"
 
 [UninstallRun]
@@ -90,11 +88,11 @@ begin
   MsgBox(
     'P2MAT Installer' + #13#10 + #13#10 +
     'This installer requires:' + #13#10 +
-    '  • Windows 10 64-bit (build 1903+) or Windows 11' + #13#10 +
-    '  • Internet connection (to download Python packages)' + #13#10 +
-    '  • ~3 GB of free disk space' + #13#10 + #13#10 +
+    '  - Windows 10 64-bit (build 1903+) or Windows 11' + #13#10 +
+    '  - Internet connection (to download Python packages)' + #13#10 +
+    '  - ~3 GB of free disk space' + #13#10 + #13#10 +
     'The setup will download and install Java 21 and Miniconda3 if ' +
-    'they are not already present. This may take 10–20 minutes.' + #13#10 + #13#10 +
+    'they are not already present. This may take 10-20 minutes.' + #13#10 + #13#10 +
     'Click OK to continue.',
     mbInformation, MB_OK
   );
