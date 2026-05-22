@@ -146,44 +146,7 @@ P2MAT will open and is now permanently allowed.
 
 ## 3. Windows Installation
 
-### 3.1 Build the Windows package
-
-Two distribution formats are available. Choose whichever suits your workflow.
-
-**ZIP archive — run on macOS or Linux (recommended)**
-
-**Prerequisite:** `zip` must be available (`brew install zip` on macOS if missing).
-
-```bash
-cd windows
-bash build_zip.sh
-```
-
-The script checks for an existing ZIP, removes it, then assembles and compresses:
-
-```
-P2MAT-v1.0.0-Windows/
-├── P2MAT/                  ← application source and ML models
-├── QSAR.yml                ← conda environment definition
-├── Install-P2MAT.ps1       ← installer script
-└── README.txt              ← generated automatically by the script
-```
-
-Output: `Release/windows/P2MAT-v1.0.0-Windows.zip`. Distribute this file to end users → they follow [section 3.2](#32-install-from-the-zip-archive-recommended).
-
-**Inno Setup `.exe` wizard — requires a Windows machine with [Inno Setup 6](https://jrsoftware.org/isinfo.php)**
-
-Stage the `P2MAT\` source folder first, then build:
-
-```batch
-cd windows
-xcopy /E /I ..\..\P2MAT P2MAT
-iscc P2MAT.iss
-```
-
-Output: `Release\windows\P2MAT-v1.0.0-Windows-x64-Setup.exe`. Distribute this file to end users → they follow [section 3.3](#33-install-from-the-exe-wizard).
-
-### 3.2 Install from the ZIP archive (recommended)
+### 3.1 Install from the ZIP archive (recommended)
 
 1. **Extract the archive** — right-click `P2MAT-v1.0.0-Windows.zip` → **Extract All** → choose a location → click **Extract**.
 
@@ -238,7 +201,7 @@ Output: `Release\windows\P2MAT-v1.0.0-Windows-x64-Setup.exe`. Distribute this fi
 5. When the installer finishes it prints **"Installation complete!"** and waits
    for you to press ENTER before closing.
 
-### 3.3 Install from the .exe wizard
+### 3.2 Install from the .exe wizard
 
 If you received a file named `P2MAT-v1.0.0-Windows-x64-Setup.exe`:
 
@@ -250,7 +213,7 @@ If you received a file named `P2MAT-v1.0.0-Windows-x64-Setup.exe`:
    on-screen prompts. The process takes 10–20 minutes.
 5. Click **Finish** when done.
 
-### 3.4 Launch P2MAT
+### 3.3 Launch P2MAT
 
 Double-click the **P2MAT** shortcut on your Desktop, or open the Start Menu
 and search for **P2MAT**.
