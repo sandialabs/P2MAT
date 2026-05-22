@@ -58,19 +58,26 @@ Distribute `P2MAT-v1.0.0-macOS-arm64.dmg`. End users double-click `install.comma
 
 ### Windows
 
-**ZIP (macOS / Linux build machine):**
+**ZIP — Windows build machine (PowerShell):**
+```powershell
+cd windows
+powershell -ExecutionPolicy Bypass -File build_zip.ps1
+```
+
+**ZIP — macOS / Linux build machine (bash):**
 ```bash
 cd windows && bash build_zip.sh
 ```
-Distribute `P2MAT-v1.0.0-Windows.zip`. End users extract and right-click `Install-P2MAT.ps1` → **Run with PowerShell**.
 
-**Inno Setup .exe (Windows build machine):**
+Both produce `P2MAT-v1.0.0-Windows.zip`. End users extract and right-click `Install-P2MAT.ps1` → **Run with PowerShell**.
+
+**Inno Setup .exe — Windows build machine:**
 ```batch
 cd windows
 xcopy /E /I ..\..\P2MAT P2MAT
 iscc P2MAT.iss
 ```
-Distribute `P2MAT-v1.0.0-Windows-x64-Setup.exe`. End users double-click and follow the wizard.
+Produces `P2MAT-v1.0.0-Windows-x64-Setup.exe`. End users double-click and follow the wizard.
 
 ### Linux
 
@@ -84,7 +91,7 @@ tar -xzf P2MAT-v1.0.0-Linux-x86_64.tar.gz && cd P2MAT-v1.0.0-Linux-x86_64 && bas
 
 ### Bumping the version
 
-Update `VERSION` in all seven files before building a new release:
+Update `VERSION` in all eight files before building a new release:
 
 | File | Variable |
 |------|----------|
@@ -93,6 +100,7 @@ Update `VERSION` in all seven files before building a new release:
 | `Release/windows/Install-P2MAT.ps1` | `$VERSION = "1.0.0"` |
 | `Release/windows/P2MAT.iss` | `#define AppVersion "1.0.0"` |
 | `Release/windows/build_zip.sh` | `VERSION="1.0.0"` |
+| `Release/windows/build_zip.ps1` | `$VERSION = "1.0.0"` |
 | `Release/linux/install.sh` | `VERSION="1.0.0"` |
 | `Release/linux/build_tarball.sh` | `VERSION="1.0.0"` |
 
