@@ -236,8 +236,7 @@ Distribute the ZIP to end users — they extract and run `Install-P2MAT.ps1`.
 
 **Prerequisites:**
 
-- [Inno Setup 6.x](https://jrsoftware.org/isinfo.php) installed on the build machine
-- The `iscc` command available on `PATH` (added automatically by the Inno Setup installer)
+- [Inno Setup 6.x](https://jrsoftware.org/isinfo.php) — free, open-source; download and install on the build machine
 
 **Build steps:**
 
@@ -256,6 +255,24 @@ The `xcopy` step is required because Inno Setup reads `P2MAT\` relative to where
 Output: `P2MAT-v1.0.0-Windows-x64-Setup.exe` (~same folder). This single `.exe` bundles the application, runs the PowerShell installer internally, and provides an uninstaller registered in **Settings → Apps**.
 
 Distribute this `.exe` to end users as a self-contained wizard installer.
+
+> **`iscc` not recognised in PowerShell?**
+> Inno Setup does not always add itself to `PATH`. You have three options:
+>
+> **Option 1 — Use the full path:**
+> ```powershell
+> & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" P2MAT.iss
+> ```
+>
+> **Option 2 — Add Inno Setup to PATH permanently:**
+> 1. Open **Start → search "Environment Variables" → Edit the system environment variables**
+> 2. Click **Environment Variables**
+> 3. Under **User variables**, select **Path → Edit → New**
+> 4. Add: `C:\Program Files (x86)\Inno Setup 6`
+> 5. Click OK on all dialogs, then **close and reopen PowerShell**
+>
+> **Option 3 — Use the Inno Setup GUI:**
+> Open **Inno Setup Compiler** from the Start Menu, go to **File → Open**, select `P2MAT.iss`, then press **F9** to compile.
 
 ---
 
