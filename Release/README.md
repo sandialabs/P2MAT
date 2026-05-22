@@ -12,14 +12,14 @@ Heat Capacity (J/K) · Heat of Hydrogenation · H₂ Uptake
 ## Table of Contents
 
 1. [System Requirements](#1-system-requirements)
-2. [macOS Installation](#2-macos-installation)
-3. [Windows Installation](#3-windows-installation)
-4. [Linux Installation](#4-linux-installation)
-5. [First Launch & Usage](#5-first-launch--usage)
-6. [What the Installer Sets Up](#6-what-the-installer-sets-up)
-7. [Uninstalling P2MAT](#7-uninstalling-p2mat)
-8. [Troubleshooting](#8-troubleshooting)
-9. [For Developers — Building the Distributables](#9-for-developers--building-the-distributables)
+2. [Quick Installation Guide](#2-quick-installation-guide)
+3. [macOS Installation](#3-macos-installation)
+4. [Windows Installation](#4-windows-installation)
+5. [Linux Installation](#5-linux-installation)
+6. [First Launch & Usage](#6-first-launch--usage)
+7. [What the Installer Sets Up](#7-what-the-installer-sets-up)
+8. [Uninstalling P2MAT](#8-uninstalling-p2mat)
+9. [Troubleshooting](#9-troubleshooting)
 
 ---
 
@@ -45,9 +45,62 @@ Heat Capacity (J/K) · Heat of Hydrogenation · H₂ Uptake
 
 ---
 
-## 2. macOS Installation
+## 2. Quick Installation Guide
 
-### 2.1 Building the DMG
+One command to build each distributable, one command to install it.
+
+### macOS
+
+```bash
+cd macOS && bash build_dmg.sh
+```
+Distribute `P2MAT-v1.0.0-macOS-arm64.dmg`. End users double-click `install.command` inside the DMG.
+
+### Windows
+
+**ZIP (macOS / Linux build machine):**
+```bash
+cd windows && bash build_zip.sh
+```
+Distribute `P2MAT-v1.0.0-Windows.zip`. End users extract and right-click `Install-P2MAT.ps1` → **Run with PowerShell**.
+
+**Inno Setup .exe (Windows build machine):**
+```batch
+cd windows
+xcopy /E /I ..\..\P2MAT P2MAT
+iscc P2MAT.iss
+```
+Distribute `P2MAT-v1.0.0-Windows-x64-Setup.exe`. End users double-click and follow the wizard.
+
+### Linux
+
+```bash
+cd linux && bash build_tarball.sh
+```
+Distribute `P2MAT-v1.0.0-Linux-x86_64.tar.gz`. End users run:
+```bash
+tar -xzf P2MAT-v1.0.0-Linux-x86_64.tar.gz && cd P2MAT-v1.0.0-Linux-x86_64 && bash install.sh
+```
+
+### Bumping the version
+
+Update `VERSION` in all seven files before building a new release:
+
+| File | Variable |
+|------|----------|
+| `Release/macOS/install.command` | `VERSION="1.0.0"` |
+| `Release/macOS/build_dmg.sh` | `VERSION="1.0.0"` |
+| `Release/windows/Install-P2MAT.ps1` | `$VERSION = "1.0.0"` |
+| `Release/windows/P2MAT.iss` | `#define AppVersion "1.0.0"` |
+| `Release/windows/build_zip.sh` | `VERSION="1.0.0"` |
+| `Release/linux/install.sh` | `VERSION="1.0.0"` |
+| `Release/linux/build_tarball.sh` | `VERSION="1.0.0"` |
+
+---
+
+## 3. macOS Installation
+
+### 3.1 Building the DMG
 
 Build the distributable DMG from source on an Apple Silicon Mac.
 
@@ -67,7 +120,7 @@ bash build_dmg.sh
 
 Output: `Release/macOS/P2MAT-v1.0.0-macOS-arm64.dmg` (~200 MB). This single file is what you distribute to end users.
 
-### 2.2 Install from the DMG
+### 3.2 Install from the DMG
 
 1. **Double-click** `P2MAT-v1.0.0-macOS-arm64.dmg`. A Finder window opens showing four items:
 
@@ -113,7 +166,7 @@ Output: `Release/macOS/P2MAT-v1.0.0-macOS-arm64.dmg` (~200 MB). This single file
 
    Close the Terminal window. P2MAT is now installed.
 
-### 2.3 What happens at each step
+### 3.3 What happens at each step
 
 | Step | What to expect | Typical duration |
 |------|---------------|-----------------|
@@ -128,7 +181,7 @@ Output: `Release/macOS/P2MAT-v1.0.0-macOS-arm64.dmg` (~200 MB). This single file
 > **administrator password**. This is normal. The password is passed to
 > `sudo` only for creating a Java symlink; no other root actions are taken.
 
-### 2.4 Launch P2MAT
+### 3.4 Launch P2MAT
 
 Open **Finder → Applications** and double-click **P2MAT**.
 
@@ -144,9 +197,9 @@ P2MAT will open and is now permanently allowed.
 
 ---
 
-## 3. Windows Installation
+## 4. Windows Installation
 
-### 3.1 Install from the ZIP archive (recommended)
+### 4.1 Install from the ZIP archive (recommended)
 
 1. **Extract the archive** — right-click `P2MAT-v1.0.0-Windows.zip` → **Extract All** → choose a location → click **Extract**.
 
@@ -201,7 +254,7 @@ P2MAT will open and is now permanently allowed.
 5. When the installer finishes it prints **"Installation complete!"** and waits
    for you to press ENTER before closing.
 
-### 3.2 Install from the .exe wizard
+### 4.2 Install from the .exe wizard
 
 If you received a file named `P2MAT-v1.0.0-Windows-x64-Setup.exe`:
 
@@ -213,7 +266,7 @@ If you received a file named `P2MAT-v1.0.0-Windows-x64-Setup.exe`:
    on-screen prompts. The process takes 10–20 minutes.
 5. Click **Finish** when done.
 
-### 3.3 Launch P2MAT
+### 4.3 Launch P2MAT
 
 Double-click the **P2MAT** shortcut on your Desktop, or open the Start Menu
 and search for **P2MAT**.
@@ -223,9 +276,9 @@ the P2MAT GUI opens.
 
 ---
 
-## 4. Linux Installation
+## 5. Linux Installation
 
-### 4.1 Build the Linux tarball
+### 5.1 Build the Linux tarball
 
 Run on any Linux machine (or macOS with `rsync` and `tar`):
 
@@ -236,7 +289,7 @@ bash build_tarball.sh
 
 Output: `P2MAT-v1.0.0-Linux-x86_64.tar.gz` (or `aarch64` on ARM). Distribute this archive to Linux end users.
 
-### 4.2 Install from the tarball
+### 5.2 Install from the tarball
 
 1. **Extract the archive** and enter the folder:
 
@@ -271,7 +324,7 @@ Output: `P2MAT-v1.0.0-Linux-x86_64.tar.gz` (or `aarch64` on ARM). Distribute thi
    ══════════════════════════════════════════
    ```
 
-### 4.3 What the installer does
+### 5.3 What the installer does
 
 | Step | What to expect | Typical duration |
 |------|---------------|-----------------|
@@ -285,7 +338,7 @@ Output: `P2MAT-v1.0.0-Linux-x86_64.tar.gz` (or `aarch64` on ARM). Distribute thi
 > **Note:** Java and Miniconda installation may require `sudo` for your
 > package manager. The installer will prompt for your password if needed.
 
-### 4.4 Launch P2MAT
+### 5.4 Launch P2MAT
 
 Search for **P2MAT** in your application menu, or run directly:
 
@@ -310,9 +363,9 @@ source ~/miniconda3/etc/profile.d/conda.sh
 
 ---
 
-## 5. First Launch & Usage
+## 6. First Launch & Usage
 
-### 5.1 Application window
+### 6.1 Application window
 
 When P2MAT opens you will see:
 
@@ -332,7 +385,7 @@ When P2MAT opens you will see:
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### 5.2 Running a prediction
+### 6.2 Running a prediction
 
 1. **Enter one or more SMILES strings** in the text area, one per line.
 
@@ -358,7 +411,7 @@ When P2MAT opens you will see:
 
 6. Click **Save data** to export the results as a CSV file.
 
-### 5.3 SMILES format tips
+### 6.3 SMILES format tips
 
 - Use standard SMILES notation (e.g. `CCO` for ethanol, `c1ccccc1` for benzene).
 - Salts and multi-fragment SMILES (containing `.`) are handled per fragment.
@@ -367,7 +420,7 @@ When P2MAT opens you will see:
 
 ---
 
-## 6. What the Installer Sets Up
+## 7. What the Installer Sets Up
 
 | Component | Version | Purpose |
 |---|---|---|
@@ -397,7 +450,7 @@ When P2MAT opens you will see:
 
 ---
 
-## 7. Uninstalling P2MAT
+## 8. Uninstalling P2MAT
 
 ### macOS
 
@@ -439,7 +492,7 @@ conda remove -n qsar --all
 
 ---
 
-## 8. Troubleshooting
+## 9. Troubleshooting
 
 ### Application won't open
 
@@ -472,64 +525,3 @@ exists it will update packages in place rather than recreating from scratch.
 
 ---
 
-## 9. For Developers — Building the Distributables
-
-### Build the macOS DMG
-
-Run on an Apple Silicon Mac with `create-dmg` installed (`brew install create-dmg`):
-
-```bash
-cd macOS
-bash build_dmg.sh
-```
-
-Output: `P2MAT-v1.0.0-macOS-arm64.dmg` (~200 MB).
-Distribute this single file to macOS end users.
-
-### Build the Windows .exe installer
-
-Run on a Windows machine with [Inno Setup 6](https://jrsoftware.org/isinfo.php) installed. Stage the `P2MAT\` source folder first, then build:
-
-```batch
-cd windows
-xcopy /E /I ..\..\P2MAT P2MAT
-iscc P2MAT.iss
-```
-
-Output: `P2MAT-v1.0.0-Windows-x64-Setup.exe`.
-
-To build the ZIP archive instead, run on macOS or Linux:
-
-```bash
-cd windows
-bash build_zip.sh
-```
-
-Output: `P2MAT-v1.0.0-Windows.zip`. Users extract it and run `Install-P2MAT.ps1`
-directly without needing the Inno Setup `.exe`.
-
-### Build the Linux tarball
-
-Run on any Linux machine (or macOS with `rsync` and `tar`):
-
-```bash
-cd linux
-bash build_tarball.sh
-```
-
-Output: `P2MAT-v1.0.0-Linux-x86_64.tar.gz` (or `aarch64` on ARM).
-Distribute this single archive to Linux end users.
-
-### Bumping the version
-
-Update the `VERSION` variable in all six files:
-
-| File | Variable |
-|------|----------|
-| `Release/macOS/install.command` | `VERSION="1.0.0"` |
-| `Release/macOS/build_dmg.sh` | `VERSION="1.0.0"` |
-| `Release/windows/Install-P2MAT.ps1` | `$VERSION = "1.0.0"` |
-| `Release/windows/P2MAT.iss` | `#define AppVersion "1.0.0"` |
-| `Release/windows/build_zip.sh` | `VERSION="1.0.0"` |
-| `Release/linux/install.sh` | `VERSION="1.0.0"` |
-| `Release/linux/build_tarball.sh` | `VERSION="1.0.0"` |
