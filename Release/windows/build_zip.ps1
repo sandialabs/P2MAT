@@ -66,6 +66,39 @@ Copy-Item $QSAR_YML (Join-Path $STAGING "QSAR.yml")
 Write-Host "  Copying Install-P2MAT.ps1..."
 Copy-Item $PS1_SCRIPT (Join-Path $STAGING "Install-P2MAT.ps1")
 
+Write-Host "  Converting logo.png to icon.ico..."
+$logoPng = Join-Path $STAGING "P2MAT\logo\logo.png"
+$icoOut  = Join-Path $STAGING "P2MAT\icon.ico"
+if (Test-Path $logoPng) {
+    try {
+        Add-Type -AssemblyName System.Drawing
+        $bmp = [System.Drawing.Bitmap]::new($logoPng)
+        $resized = [System.Drawing.Bitmap]::new(256, 256)
+        $g = [System.Drawing.Graphics]::FromImage($resized)
+        $g.InterpolationMode = [System.Drawing.Drawing2D.InterpolationMode]::HighQualityBicubic
+        $g.DrawImage($bmp, 0, 0, 256, 256)
+        $g.Dispose(); $bmp.Dispose()
+        $ms = [System.IO.MemoryStream]::new()
+        $resized.Save($ms, [System.Drawing.Imaging.ImageFormat]::Png)
+        $pngBytes = $ms.ToArray()
+        $ms.Dispose(); $resized.Dispose()
+        $out = [System.IO.MemoryStream]::new()
+        $w   = [System.IO.BinaryWriter]::new($out)
+        $w.Write([uint16]0); $w.Write([uint16]1); $w.Write([uint16]1)
+        $w.Write([byte]0); $w.Write([byte]0); $w.Write([byte]0); $w.Write([byte]0)
+        $w.Write([uint16]1); $w.Write([uint16]32)
+        $w.Write([uint32]$pngBytes.Length); $w.Write([uint32]22)
+        $w.Write($pngBytes); $w.Flush()
+        [System.IO.File]::WriteAllBytes($icoOut, $out.ToArray())
+        $w.Dispose(); $out.Dispose()
+        Write-Host "    icon.ico created" -ForegroundColor Green
+    } catch {
+        Write-Host "    Warning: icon conversion failed ($_)" -ForegroundColor Yellow
+    }
+} else {
+    Write-Host "    Warning: logo\logo.png not found - icon.ico will not be included" -ForegroundColor Yellow
+}
+
 Write-Host "  Creating README.txt..."
 $readme = @"
 P2MAT v$VERSION - Material Property Prediction Tool

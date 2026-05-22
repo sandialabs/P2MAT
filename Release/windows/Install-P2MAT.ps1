@@ -45,6 +45,31 @@ function Test-CommandExists([string]$cmd) {
     return [bool](Get-Command $cmd -ErrorAction SilentlyContinue)
 }
 
+function Convert-PngToIco([string]$PngPath, [string]$IcoPath) {
+    Add-Type -AssemblyName System.Drawing
+    $bmp = [System.Drawing.Bitmap]::new($PngPath)
+    # Resize to 256x256 for the ICO frame
+    $resized = [System.Drawing.Bitmap]::new(256, 256)
+    $g = [System.Drawing.Graphics]::FromImage($resized)
+    $g.InterpolationMode = [System.Drawing.Drawing2D.InterpolationMode]::HighQualityBicubic
+    $g.DrawImage($bmp, 0, 0, 256, 256)
+    $g.Dispose(); $bmp.Dispose()
+    $ms = [System.IO.MemoryStream]::new()
+    $resized.Save($ms, [System.Drawing.Imaging.ImageFormat]::Png)
+    $pngBytes = $ms.ToArray()
+    $ms.Dispose(); $resized.Dispose()
+    # Build a single-frame ICO (Vista+ supports embedded PNG frames)
+    $out = [System.IO.MemoryStream]::new()
+    $w   = [System.IO.BinaryWriter]::new($out)
+    $w.Write([uint16]0); $w.Write([uint16]1); $w.Write([uint16]1)  # ICO header
+    $w.Write([byte]0);  $w.Write([byte]0);  $w.Write([byte]0); $w.Write([byte]0)  # dir: 256x256, no palette
+    $w.Write([uint16]1); $w.Write([uint16]32)                      # planes, bit depth
+    $w.Write([uint32]$pngBytes.Length); $w.Write([uint32]22)       # size, offset after 6+16 bytes
+    $w.Write($pngBytes); $w.Flush()
+    [System.IO.File]::WriteAllBytes($IcoPath, $out.ToArray())
+    $w.Dispose(); $out.Dispose()
+}
+
 # ── Configuration ────────────────────────────────────────────
 $VERSION     = "1.0.0"
 $ENV_NAME    = "qsar"
@@ -222,13 +247,34 @@ python p2mat.py
 Set-Content -Path $launcherPath -Value $launcherContent -Encoding ASCII
 Write-OK "Launcher: $launcherPath"
 
+# Resolve icon for shortcuts (Windows requires .ico format)
+$icoPath = Join-Path $INSTALL_DIR "icon.ico"
+if (-not (Test-Path $icoPath)) {
+    # icon.ico not pre-built in package; generate it from logo.png
+    $logoPng = Join-Path $INSTALL_DIR "logo\logo.png"
+    if (Test-Path $logoPng) {
+        try {
+            Convert-PngToIco -PngPath $logoPng -IcoPath $icoPath
+            Write-OK "Icon created from logo.png"
+        } catch {
+            Write-Warn "Icon conversion failed ($_) - shortcuts will use default icon"
+            $icoPath = $null
+        }
+    } else {
+        Write-Warn "icon.ico and logo\logo.png not found - shortcuts will use default icon"
+        $icoPath = $null
+    }
+} else {
+    Write-OK "Icon: $icoPath"
+}
+
 # Desktop shortcut
 $shell    = New-Object -ComObject WScript.Shell
 $desktop  = [System.Environment]::GetFolderPath("Desktop")
 $shortcut = $shell.CreateShortcut("$desktop\P2MAT.lnk")
 $shortcut.TargetPath       = $launcherPath
 $shortcut.WorkingDirectory = $INSTALL_DIR
-$shortcut.IconLocation     = "$INSTALL_DIR\icon.png"
+if ($icoPath) { $shortcut.IconLocation = $icoPath }
 $shortcut.Description      = "P2MAT - Material Property Prediction"
 $shortcut.WindowStyle      = 1
 $shortcut.Save()
@@ -240,7 +286,7 @@ $null = New-Item -ItemType Directory -Force -Path $startMenu
 $smShortcut = $shell.CreateShortcut("$startMenu\P2MAT.lnk")
 $smShortcut.TargetPath       = $launcherPath
 $smShortcut.WorkingDirectory = $INSTALL_DIR
-$smShortcut.IconLocation     = "$INSTALL_DIR\icon.png"
+if ($icoPath) { $smShortcut.IconLocation = $icoPath }
 $smShortcut.Description      = "P2MAT - Material Property Prediction"
 $smShortcut.WindowStyle      = 1
 $smShortcut.Save()

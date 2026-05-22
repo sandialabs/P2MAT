@@ -50,6 +50,30 @@ cp "$QSAR_YML" "$STAGING/${ARCHIVE_NAME}/QSAR.yml"
 echo "  Copying Install-P2MAT.ps1..."
 cp "$PS1_SCRIPT" "$STAGING/${ARCHIVE_NAME}/Install-P2MAT.ps1"
 
+echo "  Converting icon.icns to icon.ico..."
+ICNS_SRC="$SOURCE_APP/icon.icns"
+ICO_DEST="$STAGING/${ARCHIVE_NAME}/P2MAT/icon.ico"
+if [[ -f "$ICNS_SRC" ]]; then
+    TMP_PNG=$(mktemp /tmp/p2mat_icon_XXXXXX.png)
+    # sips is built into macOS; extracts a 256x256 PNG from the icns
+    sips -s format png "$ICNS_SRC" -z 256 256 --out "$TMP_PNG" &>/dev/null
+    python3 - "$TMP_PNG" "$ICO_DEST" <<'PYEOF'
+import struct, sys
+with open(sys.argv[1], 'rb') as f:
+    png = f.read()
+# Single-frame ICO with embedded PNG (Vista+ format)
+ico  = struct.pack('<HHH', 0, 1, 1)
+ico += struct.pack('<BBBBHHII', 0, 0, 0, 0, 1, 32, len(png), 22)
+ico += png
+with open(sys.argv[2], 'wb') as f:
+    f.write(ico)
+PYEOF
+    rm -f "$TMP_PNG"
+    echo "    icon.ico created"
+else
+    echo "  Warning: icon.icns not found at $ICNS_SRC - icon.ico will not be included"
+fi
+
 echo "  Creating README.txt..."
 cat > "$STAGING/${ARCHIVE_NAME}/README.txt" <<README
 P2MAT v${VERSION} - Material Property Prediction Tool
