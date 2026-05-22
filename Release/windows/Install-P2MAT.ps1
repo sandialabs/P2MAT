@@ -96,7 +96,7 @@ Write-Step "Step 2/6 - Java 21 LTS (required by PaDEL descriptor engine)"
 
 $javaOK = $false
 if (Test-CommandExists "java") {
-    $jv = (java -version 2>&1 | ForEach-Object { $_.ToString() } | Select-String "version" | Select-Object -First 1).ToString()
+    $jv = (& { $ErrorActionPreference = 'Continue'; java -version 2>&1 } | ForEach-Object { $_.ToString() } | Select-String "version" | Select-Object -First 1).ToString()
     Write-OK "Java already installed: $jv"
     $javaOK = $true
 } else {
@@ -147,10 +147,10 @@ if (Test-Path $CONDA_EXE) {
 Write-Step "Step 4/6 - Python environment  (may take 5-15 minutes)"
 
 # Initialise conda for this PowerShell session
-& $CONDA_EXE init powershell --quiet 2>&1 | ForEach-Object { $_.ToString() } | Out-Null
+& { $ErrorActionPreference = 'Continue'; & $CONDA_EXE init powershell --quiet 2>&1 } | ForEach-Object { $_.ToString() } | Out-Null
 & $CONDA_HOOK
 
-$envExists = (& $CONDA_EXE env list 2>&1 | ForEach-Object { $_.ToString() }) -match "^$ENV_NAME\s"
+$envExists = (& { $ErrorActionPreference = 'Continue'; & $CONDA_EXE env list 2>&1 } | ForEach-Object { $_.ToString() }) -match "^$ENV_NAME\s"
 
 if ($envExists) {
     Write-Warn "Conda environment '$ENV_NAME' already exists - updating packages..."
