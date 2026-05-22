@@ -67,46 +67,53 @@ bash build_dmg.sh
 
 Output: `Release/macOS/P2MAT-v1.0.0-macOS-arm64.dmg` (~200 MB). This single file is what you distribute to end users.
 
-### 2.2 Open the disk image
+### 2.2 Install from the DMG
 
-Double-click the `.dmg` file. A new Finder window opens showing three items:
+1. **Double-click** `P2MAT-v1.0.0-macOS-arm64.dmg`. A Finder window opens showing four items:
 
-```
-┌─────────────────────────────────────────────────────┐
-│  P2MAT Installer                                    │
-│                                                     │
-│   📁 P2MAT   📄 QSAR.yml   📄 install.command   📄 README.txt │
-└─────────────────────────────────────────────────────┘
-```
+   ```
+   ┌──────────────────────────────────────────────────────────────┐
+   │  P2MAT Installer                                             │
+   │                                                              │
+   │   📁 P2MAT   📄 QSAR.yml   📄 install.command   📄 README.txt │
+   └──────────────────────────────────────────────────────────────┘
+   ```
 
-### 2.3 Run the installer
+2. **Double-click `install.command`.**
 
-**Double-click `install.command`.**
+   macOS will ask: _"install.command is an application downloaded from the internet. Are you sure you want to open it?"_ Click **Open**.
 
-macOS will ask: _"install.command is an application downloaded from the internet. Are you sure you want to open it?"_
-Click **Open**.
+   A Terminal window opens. You will see:
 
-A Terminal window opens and begins the installation. You will see output like:
+   ```
+   ══════════════════════════════════════════
+     P2MAT v1.0.0  –  macOS Installer
+   ══════════════════════════════════════════
 
-```
-══════════════════════════════════════════
-  P2MAT v1.0.0  –  macOS Installer
-══════════════════════════════════════════
+     This installer will:
+       1. Verify macOS version and hardware
+       2. Install Homebrew (if needed)
+       3. Install Java / OpenJDK (if needed)
+       4. Install Miniconda (if needed)
+       5. Create the 'qsar' Python environment
+       6. Install P2MAT and create the Application bundle
 
-  This installer will:
-    1. Verify macOS version and hardware
-    2. Install Homebrew (if needed)
-    3. Install Java / OpenJDK (if needed)
-    4. Install Miniconda (if needed)
-    5. Create the 'qsar' Python environment
-    6. Install P2MAT and create the Application bundle
+     Press ENTER to continue, or Ctrl+C to cancel ...
+   ```
 
-  Press ENTER to continue, or Ctrl+C to cancel ...
-```
+   Press **ENTER** to begin.
 
-Press **ENTER** to begin.
+3. When installation finishes you will see:
 
-### 2.4 What happens at each step
+   ```
+   ══════════════════════════════════════════
+     Installation complete
+   ══════════════════════════════════════════
+   ```
+
+   Close the Terminal window. P2MAT is now installed.
+
+### 2.3 What happens at each step
 
 | Step | What to expect | Typical duration |
 |------|---------------|-----------------|
@@ -121,19 +128,7 @@ Press **ENTER** to begin.
 > **administrator password**. This is normal. The password is passed to
 > `sudo` only for creating a Java symlink; no other root actions are taken.
 
-### 2.5 Installation complete
-
-When you see the banner:
-
-```
-══════════════════════════════════════════
-  Installation complete
-══════════════════════════════════════════
-```
-
-the Terminal window may be closed. P2MAT is now installed.
-
-### 2.6 Launch P2MAT
+### 2.4 Launch P2MAT
 
 Open **Finder → Applications** and double-click **P2MAT**.
 
@@ -153,7 +148,9 @@ P2MAT will open and is now permanently allowed.
 
 ### 3.1 Build the Windows package
 
-**Option A — ZIP archive** — zip the following into `P2MAT-v1.0.0-Windows.zip` using any file manager or `zip` utility:
+Two distribution formats are available. Choose whichever is easier for your workflow.
+
+**ZIP archive (simpler)** — assemble the following folder and zip it into `P2MAT-v1.0.0-Windows.zip`:
 
 ```
 P2MAT-v1.0.0-Windows\
@@ -163,9 +160,9 @@ P2MAT-v1.0.0-Windows\
 └── README.txt
 ```
 
-Distribute this archive to end users (see [sections 3.2–3.3](#32-extract-the-archive)).
+Distribute the `.zip` to end users → they follow [section 3.2](#32-install-from-the-zip-archive-recommended).
 
-**Option B — Inno Setup installer (.exe)** — requires [Inno Setup 6](https://jrsoftware.org/isinfo.php) on a Windows machine. The `P2MAT.iss` script expects the `P2MAT\` source folder to be present in the same directory as the script, so stage it first:
+**Inno Setup `.exe` wizard** — requires [Inno Setup 6](https://jrsoftware.org/isinfo.php) on a Windows machine. Stage the `P2MAT\` source folder first, then build:
 
 ```batch
 cd windows
@@ -173,25 +170,23 @@ xcopy /E /I ..\..\P2MAT P2MAT
 iscc P2MAT.iss
 ```
 
-Output: `Release\windows\P2MAT-v1.0.0-Windows-x64-Setup.exe`. Distribute this single file to end users (see [section 3.4](#34-option-b--windows-exe-wizard-installer)).
+Output: `Release\windows\P2MAT-v1.0.0-Windows-x64-Setup.exe`. Distribute this single file to end users → they follow [section 3.3](#33-install-from-the-exe-wizard).
 
-### 3.2 Extract the archive
+### 3.2 Install from the ZIP archive (recommended)
 
-Right-click the `.zip` file → **Extract All** → choose a location → click **Extract**.
+1. **Extract the archive** — right-click `P2MAT-v1.0.0-Windows.zip` → **Extract All** → choose a location → click **Extract**.
 
-The extracted folder contains:
+   The extracted folder contains:
 
-```
-P2MAT-v1.0.0-Windows\
-├── P2MAT\                  ← application source and ML models
-├── QSAR.yml                ← conda environment definition
-├── Install-P2MAT.ps1       ← installer script
-└── README.txt
-```
+   ```
+   P2MAT-v1.0.0-Windows\
+   ├── P2MAT\                  ← application source and ML models
+   ├── QSAR.yml                ← conda environment definition
+   ├── Install-P2MAT.ps1       ← installer script
+   └── README.txt
+   ```
 
-### 3.3 Option A — PowerShell installer (recommended)
-
-1. **Right-click** `Install-P2MAT.ps1` → **Run with PowerShell**
+2. **Right-click** `Install-P2MAT.ps1` → **Run with PowerShell**.
 
    If you see a blue security warning, click **Open** or **Run anyway**.
 
@@ -200,9 +195,9 @@ P2MAT-v1.0.0-Windows\
    ```powershell
    Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
    ```
-   Then try double-clicking again.
+   Then try right-clicking again.
 
-2. The installer window shows:
+3. The installer window shows:
 
    ```
    ==================================================
@@ -218,7 +213,7 @@ P2MAT-v1.0.0-Windows\
 
    Press **ENTER**.
 
-3. What happens at each step:
+4. What happens at each step:
 
    | Step | What to expect | Typical duration |
    |------|---------------|-----------------|
@@ -229,10 +224,10 @@ P2MAT-v1.0.0-Windows\
    | **Application files** | Copies P2MAT to `%LOCALAPPDATA%\P2MAT\` and writes the launcher batch file. | < 30 s |
    | **Shortcuts** | Creates a Desktop shortcut and a Start Menu entry under **P2MAT**. | < 5 s |
 
-4. When the installer finishes it prints **"Installation complete!"** and waits
+5. When the installer finishes it prints **"Installation complete!"** and waits
    for you to press ENTER before closing.
 
-### 3.4 Option B — Windows .exe wizard installer
+### 3.3 Install from the .exe wizard
 
 If you received a file named `P2MAT-v1.0.0-Windows-x64-Setup.exe`:
 
@@ -244,7 +239,7 @@ If you received a file named `P2MAT-v1.0.0-Windows-x64-Setup.exe`:
    on-screen prompts. The process takes 10–20 minutes.
 5. Click **Finish** when done.
 
-### 3.5 Launch P2MAT
+### 3.4 Launch P2MAT
 
 Double-click the **P2MAT** shortcut on your Desktop, or open the Start Menu
 and search for **P2MAT**.
@@ -267,46 +262,56 @@ bash build_tarball.sh
 
 Output: `P2MAT-v1.0.0-Linux-x86_64.tar.gz` (or `aarch64` on ARM). Distribute this archive to Linux end users.
 
-### 4.2 Extract the archive
+### 4.2 Install from the tarball
 
-```bash
-tar -xzf P2MAT-v1.0.0-Linux-x86_64.tar.gz
-cd P2MAT-v1.0.0-Linux-x86_64
-```
+1. **Extract the archive** and enter the folder:
 
-The folder contains:
+   ```bash
+   tar -xzf P2MAT-v1.0.0-Linux-x86_64.tar.gz
+   cd P2MAT-v1.0.0-Linux-x86_64
+   ```
 
-```
-P2MAT-v1.0.0-Linux-x86_64/
-├── P2MAT/          ← application source and ML models
-├── QSAR.yml        ← conda environment definition
-├── install.sh      ← installer script
-└── README.txt
-```
+   The folder contains:
 
-### 4.3 Run the installer
+   ```
+   P2MAT-v1.0.0-Linux-x86_64/
+   ├── P2MAT/          ← application source and ML models
+   ├── QSAR.yml        ← conda environment definition
+   ├── install.sh      ← installer script
+   └── README.txt
+   ```
 
-```bash
-bash install.sh
-```
+2. **Run the installer:**
 
-Press **ENTER** when prompted to begin.
+   ```bash
+   bash install.sh
+   ```
 
-### 4.4 What the installer does
+   Press **ENTER** when prompted to begin.
 
-| Step | Action | Typical duration |
-|------|--------|-----------------|
+3. When installation finishes you will see:
+
+   ```
+   ══════════════════════════════════════════
+     Installation complete
+   ══════════════════════════════════════════
+   ```
+
+### 4.3 What the installer does
+
+| Step | What to expect | Typical duration |
+|------|---------------|-----------------|
 | **System check** | Confirms Linux x86\_64/aarch64 and detects the distribution. | < 1 s |
 | **Java 17** | Installs OpenJDK 17 via `apt`, `dnf`, `zypper`, or `pacman` depending on the distro. Skips if already present. | 0–3 min |
 | **Miniconda3** | Downloads and installs Miniconda3 to `~/miniconda3` if no `conda` is found. | 1–3 min |
 | **Python environment** | Creates the `qsar` conda environment and installs all packages including PyTorch, LightGBM, RDKit, and PyQt5. **Longest step.** | 5–15 min |
-| **Application install** | Copies files to `~/.local/share/P2MAT/`. | < 30 s |
+| **Application install** | Copies files to `~/.local/share/P2MAT/` and writes the launch script. | < 30 s |
 | **Desktop launcher** | Creates a `.desktop` entry so P2MAT appears in your application menu. | < 1 s |
 
 > **Note:** Java and Miniconda installation may require `sudo` for your
 > package manager. The installer will prompt for your password if needed.
 
-### 4.5 Launch P2MAT
+### 4.4 Launch P2MAT
 
 Search for **P2MAT** in your application menu, or run directly:
 
