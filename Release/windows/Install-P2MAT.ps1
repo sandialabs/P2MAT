@@ -37,8 +37,8 @@ function Write-Fail([string]$msg)  { Write-Host "`n[ERROR] $msg`n" -ForegroundCo
 
 function Get-FileFromWeb([string]$Url, [string]$Dest) {
     Write-Host "  Downloading $(Split-Path $Url -Leaf) ..."
-    $wc = New-Object System.Net.WebClient
-    $wc.DownloadFile($Url, $Dest)
+    Invoke-WebRequest -Uri $Url -OutFile $Dest -UseBasicParsing `
+        -Headers @{ "User-Agent" = "Mozilla/5.0 (Windows NT 10.0; Win64; x64)" }
 }
 
 function Test-CommandExists([string]$cmd) {
@@ -129,13 +129,29 @@ Write-Step "Step 3/6 - Miniconda3"
 if (Test-Path $CONDA_EXE) {
     Write-OK "Miniconda already installed at $MINI_DIR"
 } else {
-    $miniInstaller = Join-Path $env:TEMP "Miniconda3-installer.exe"
-    Get-FileFromWeb -Url $MINICONDA_URL -Dest $miniInstaller
+    $condaOK = $false
 
-    Write-Warn "Installing Miniconda3 (silent, just for current user)..."
-    $miniArgs = "/S /InstallationType=JustMe /RegisterPython=0 /D=$MINI_DIR"
-    Start-Process $miniInstaller -ArgumentList $miniArgs -Wait
-    Remove-Item $miniInstaller -Force -ErrorAction SilentlyContinue
+    # Try winget first (Windows 10/11 with App Installer)
+    if (Test-CommandExists "winget") {
+        Write-Warn "Installing Miniconda3 via winget..."
+        try {
+            winget install --id Anaconda.Miniconda3 --silent --accept-package-agreements --accept-source-agreements
+            $condaOK = $true
+            Write-OK "Miniconda3 installed via winget"
+        } catch {
+            Write-Warn "winget install failed, falling back to direct download..."
+        }
+    }
+
+    if (-not $condaOK) {
+        $miniInstaller = Join-Path $env:TEMP "Miniconda3-installer.exe"
+        Get-FileFromWeb -Url $MINICONDA_URL -Dest $miniInstaller
+
+        Write-Warn "Installing Miniconda3 (silent, just for current user)..."
+        $miniArgs = "/S /InstallationType=JustMe /RegisterPython=0 /D=$MINI_DIR"
+        Start-Process $miniInstaller -ArgumentList $miniArgs -Wait
+        Remove-Item $miniInstaller -Force -ErrorAction SilentlyContinue
+    }
 
     if (-not (Test-Path $CONDA_EXE)) {
         Write-Fail "Miniconda installation failed. Please install manually from https://docs.conda.io/en/latest/miniconda.html"
