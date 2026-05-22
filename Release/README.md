@@ -75,7 +75,7 @@ Double-click the `.dmg` file. A new Finder window opens showing three items:
 ┌─────────────────────────────────────────────────────┐
 │  P2MAT Installer                                    │
 │                                                     │
-│   📁 P2MAT       📄 install.command   📄 README.txt │
+│   📁 P2MAT   📄 QSAR.yml   📄 install.command   📄 README.txt │
 └─────────────────────────────────────────────────────┘
 ```
 
@@ -114,7 +114,7 @@ Press **ENTER** to begin.
 | **Homebrew** | Installs Homebrew if missing (may ask for your password). If already installed, skips. | 0–5 min |
 | **Java** | Installs the latest OpenJDK via `brew install openjdk`. Java is required by the PaDEL descriptor engine. | 0–3 min |
 | **Miniconda** | Downloads and installs Miniconda3 for Apple Silicon if no conda is found. | 1–3 min |
-| **Python environment** | Creates the `qsar` conda environment and installs ~40 packages including PyTorch, LightGBM, RDKit, and PyQt5. **This is the longest step.** | 5–15 min |
+| **Python environment** | Creates the `qsar` conda environment and installs ~40 packages including PyTorch, LightGBM, RDKit, and PyQt5. **This is the longest step.** | 5–10 min |
 | **Application install** | Copies the app to `~/Applications/P2MAT/` and creates `/Applications/P2MAT.app`. | < 30 s |
 
 > **Note:** During the Homebrew or Java step macOS may prompt for your
@@ -158,6 +158,7 @@ P2MAT will open and is now permanently allowed.
 ```
 P2MAT-v1.0.0-Windows\
 ├── P2MAT\                  ← application source and ML models
+├── QSAR.yml                ← conda environment definition
 ├── Install-P2MAT.ps1       ← installer script
 └── README.txt
 ```
@@ -183,6 +184,7 @@ The extracted folder contains:
 ```
 P2MAT-v1.0.0-Windows\
 ├── P2MAT\                  ← application source and ML models
+├── QSAR.yml                ← conda environment definition
 ├── Install-P2MAT.ps1       ← installer script
 └── README.txt
 ```
@@ -204,12 +206,12 @@ P2MAT-v1.0.0-Windows\
 
    ```
    ==================================================
-     P2MAT v1.0.0  –  Windows Installer
+     P2MAT v1.0.0  -  Windows Installer
    ==================================================
 
      This installer will set up P2MAT on your computer.
      An internet connection is required for the first install.
-     Estimated time: 10–20 minutes.
+     Estimated time: 10-20 minutes.
 
      Press ENTER to continue, or Ctrl+C to cancel
    ```
@@ -223,7 +225,8 @@ P2MAT-v1.0.0-Windows\
    | **System check** | Verifies 64-bit Windows 10 build 1903+. Aborts if unsupported. | < 1 s |
    | **Java 21** | Installs Microsoft OpenJDK 21 via `winget`, or downloads the MSI installer. A UAC prompt may appear. | 1–5 min |
    | **Miniconda3** | Downloads and silently installs Miniconda3 for the current user only (no admin rights needed). | 2–4 min |
-   | **Python environment** | Creates the `qsar` conda environment and installs all packages. **This is the longest step.** | 8–15 min |
+   | **Python environment** | Creates the `qsar` conda environment and installs all packages. **This is the longest step.** | 5–15 min |
+   | **Application files** | Copies P2MAT to `%LOCALAPPDATA%\P2MAT\` and writes the launcher batch file. | < 30 s |
    | **Shortcuts** | Creates a Desktop shortcut and a Start Menu entry under **P2MAT**. | < 5 s |
 
 4. When the installer finishes it prints **"Installation complete!"** and waits
@@ -237,8 +240,8 @@ If you received a file named `P2MAT-v1.0.0-Windows-x64-Setup.exe`:
 2. If prompted by Windows SmartScreen: click **More info → Run anyway**.
 3. Follow the installation wizard. Accept the defaults and click **Next** until
    **Install** is available, then click **Install**.
-4. The wizard runs the PowerShell installer in the background. Progress is
-   shown in a status bar. The process takes 10–20 minutes.
+4. The wizard opens a PowerShell window and runs the installer. Follow the
+   on-screen prompts. The process takes 10–20 minutes.
 5. Click **Finish** when done.
 
 ### 3.5 Launch P2MAT
@@ -276,6 +279,7 @@ The folder contains:
 ```
 P2MAT-v1.0.0-Linux-x86_64/
 ├── P2MAT/          ← application source and ML models
+├── QSAR.yml        ← conda environment definition
 ├── install.sh      ← installer script
 └── README.txt
 ```
@@ -295,7 +299,7 @@ Press **ENTER** when prompted to begin.
 | **System check** | Confirms Linux x86\_64/aarch64 and detects the distribution. | < 1 s |
 | **Java 17** | Installs OpenJDK 17 via `apt`, `dnf`, `zypper`, or `pacman` depending on the distro. Skips if already present. | 0–3 min |
 | **Miniconda3** | Downloads and installs Miniconda3 to `~/miniconda3` if no `conda` is found. | 1–3 min |
-| **Python environment** | Creates the `qsar` conda environment and installs all packages including PyTorch, LightGBM, RDKit, and PyQt5. **Longest step.** | 8–15 min |
+| **Python environment** | Creates the `qsar` conda environment and installs all packages including PyTorch, LightGBM, RDKit, and PyQt5. **Longest step.** | 5–15 min |
 | **Application install** | Copies files to `~/.local/share/P2MAT/`. | < 30 s |
 | **Desktop launcher** | Creates a `.desktop` entry so P2MAT appears in your application menu. | < 1 s |
 
@@ -516,7 +520,7 @@ iscc P2MAT.iss
 Output: `P2MAT-v1.0.0-Windows-x64-Setup.exe`.
 
 Alternatively, distribute `P2MAT-v1.0.0-Windows.zip` (the `windows/` folder
-zipped with the `P2MAT/` source alongside `Install-P2MAT.ps1`). Users run
+zipped with the `P2MAT/` source, `QSAR.yml`, and `Install-P2MAT.ps1`). Users run
 the PowerShell script directly without needing the Inno Setup `.exe`.
 
 ### Build the Linux tarball
