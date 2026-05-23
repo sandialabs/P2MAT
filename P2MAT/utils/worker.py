@@ -26,9 +26,14 @@ Signals emitted by :class:`PredictionWorker`:
 """
 from __future__ import annotations
 
+import logging
+import traceback
+
 from PyQt5.QtCore import QThread, pyqtSignal
 
 from utils.mspp import MaterialStructuralPropertyPrediction
+
+logger = logging.getLogger("p2mat")
 
 
 class PredictionWorker(QThread):
@@ -115,7 +120,9 @@ class PredictionWorker(QThread):
             )
             wrong_smiles = mspp.prediction_from_smile(self._smiles)
         except Exception as exc:
-            self.error.emit(str(exc))
+            tb = traceback.format_exc()
+            logger.error("Prediction failed:\n%s", tb)
+            self.error.emit(f"{str(exc)}\n{tb}")
             self.invalid_smiles.emit([])
             self.result.emit(None)
             return
