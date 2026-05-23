@@ -202,6 +202,21 @@ ok "Launcher written: $LAUNCHER"
 # ── 6. Desktop entry ─────────────────────────────────────────
 step "Step 6/6 — Creating desktop launcher"
 
+# Install icon into the XDG icon hierarchy so all desktop environments find it
+ICON_SRC="$INSTALL_DIR/logo/logo.png"
+ICON_DIR="$HOME/.local/share/icons/hicolor/256x256/apps"
+mkdir -p "$ICON_DIR"
+if [[ -f "$ICON_SRC" ]]; then
+    cp "$ICON_SRC" "$ICON_DIR/p2mat.png"
+    # Refresh icon cache if available
+    if command -v gtk-update-icon-cache &>/dev/null; then
+        gtk-update-icon-cache -f "$HOME/.local/share/icons/hicolor" 2>/dev/null || true
+    fi
+    ok "Icon installed: $ICON_DIR/p2mat.png"
+else
+    warn "logo/logo.png not found — application menu icon will be blank"
+fi
+
 mkdir -p "$(dirname "$DESKTOP_FILE")"
 cat > "$DESKTOP_FILE" <<DESKTOP
 [Desktop Entry]
@@ -211,7 +226,7 @@ Name=P2MAT
 GenericName=Material Property Prediction
 Comment=Predict thermophysical properties of molecules from SMILES strings
 Exec=${LAUNCHER}
-Icon=${INSTALL_DIR}/icon.png
+Icon=p2mat
 Terminal=false
 Categories=Science;Chemistry;Education;
 Keywords=SMILES;QSAR;chemistry;materials;melting point;
