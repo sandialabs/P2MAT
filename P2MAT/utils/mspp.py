@@ -512,25 +512,34 @@ class MaterialStructuralPropertyPrediction:
         n = len(self.df_mol) if self.df_mol is not None else 0
 
         self._status(f"All descriptors ready — running models on {n} molecule(s)…")
+        logger.info("Starting model predictions on %d molecule(s).", n)
 
         if self.props.get("MP"):
             self._status("Predicting melting point (MP)…")
+            logger.info("Running MP stacking ensemble…")
             self.df_mol["MP_pred_K"] = self._predict_MP()
+            logger.info("MP prediction complete.")
             output_cols.append("MP_pred_K")
 
         if self.props.get("BP"):
             self._status("Predicting boiling point (BP)…")
+            logger.info("Running BP stacking ensemble…")
             self.df_mol["BP_pred_K"] = self._predict_BP()
+            logger.info("BP prediction complete.")
             output_cols.append("BP_pred_K")
 
         if self.props.get("HC"):
             self._status("Predicting heat capacity (HC)…")
+            logger.info("Running HC model…")
             self.df_mol["HC_pred_JK"] = self._predict_HC()
+            logger.info("HC prediction complete.")
             output_cols.append("HC_pred_JK")
 
         if self.props.get("dH"):
             self._status("Predicting heat of hydrogenation (dH)…")
+            logger.info("Running dH model…")
             self.df_mol["dH_pred_JK"] = self._predict_HH()
+            logger.info("dH prediction complete.")
             output_cols.append("dH_pred_JK")
 
         # Drop all raw descriptor columns — keep only SMILES + predictions.
@@ -585,15 +594,20 @@ class MaterialStructuralPropertyPrediction:
             empty).  Results are stored in ``self.df_mol``.
         """
         self._status(f"Validating {len(smiles)} SMILES…")
+        logger.info("Validating %d SMILES…", len(smiles))
         valid, invalid = self._smile.get_valid_smiles(smiles)
         self._status(
             f"{len(valid)} valid, {len(invalid)} invalid SMILES found."
         )
+        logger.info("%d valid, %d invalid SMILES.", len(valid), len(invalid))
         if self._on_valid_count is not None:
             self._on_valid_count(len(valid))
         if valid:
+            logger.info("Computing PaDEL descriptors…")
             self._compute_features(valid)
+            logger.info("Descriptors complete. Starting predictions…")
             self._run_predictions()
+            logger.info("All predictions complete.")
             invalid = invalid + self._padel_failed
         return invalid
 
