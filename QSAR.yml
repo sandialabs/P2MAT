@@ -8,7 +8,7 @@ dependencies:
     - jupyter
     - scikit-learn
     - scipy
-    - numpy>=2
+    - numpy
     - pandas
     - pandas-datareader
     - statsmodels
