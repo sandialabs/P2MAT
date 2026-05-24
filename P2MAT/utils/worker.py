@@ -122,8 +122,11 @@ class PredictionWorker(QThread):
         except Exception as exc:
             tb = traceback.format_exc()
             logger.error("Prediction failed:\n%s", tb)
-            self.error.emit(f"{str(exc)}\n{tb}")
-            self.invalid_smiles.emit([])
+            self.error.emit(str(exc))
+            # Emit any SMILES that RDKit already flagged before the exception;
+            # mspp._invalid_smiles is set before _compute_features is called, so
+            # it is never empty due to the exception itself.
+            self.invalid_smiles.emit(mspp._invalid_smiles)
             self.result.emit(None)
             return
 

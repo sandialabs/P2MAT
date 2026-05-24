@@ -120,6 +120,8 @@ class MaterialStructuralPropertyPrediction:
         self._depict: DepictSmile | None = None
         self.df_mol: pd.DataFrame | None = None
         self._padel_failed: list[str] = []
+        self._invalid_smiles: list[str] = []  # RDKit-invalid SMILES; set early so
+                                               # callers can read it even after an exception
         self._processed_count: int = 0
         self._n_batches: int = 0
 
@@ -596,6 +598,8 @@ class MaterialStructuralPropertyPrediction:
         self._status(f"Validating {len(smiles)} SMILES…")
         logger.info("Validating %d SMILES…", len(smiles))
         valid, invalid = self._smile.get_valid_smiles(smiles)
+        # Store early on self so the worker can read it even if _compute_features raises.
+        self._invalid_smiles = list(invalid)
         self._status(
             f"{len(valid)} valid, {len(invalid)} invalid SMILES found."
         )
@@ -608,8 +612,8 @@ class MaterialStructuralPropertyPrediction:
             logger.info("Descriptors complete. Starting predictions…")
             self._run_predictions()
             logger.info("All predictions complete.")
-            invalid = invalid + self._padel_failed
-        return invalid
+            self._invalid_smiles = self._invalid_smiles + self._padel_failed
+        return self._invalid_smiles
 
     def prediction_from_pid(self, pubchem_ids) -> list:
         """Predict properties from PubChem compound IDs.

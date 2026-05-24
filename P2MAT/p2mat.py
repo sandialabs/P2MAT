@@ -395,13 +395,27 @@ class MatPropPred(QWidget):
                 self.result_details_lbl.appendPlainText(f"  {i + 1}) {s}")
 
     def _on_error(self, message: str) -> None:
-        """Print unexpected per-molecule errors to the console."""
+        """Display unexpected errors in the result panel and on the console.
+
+        The first line of *message* (the exception text, without the traceback)
+        is shown in the GUI so the user understands what went wrong.  The full
+        text is printed to the terminal for debugging.
+        """
         print(f"Prediction error: {message}")
+        # Show the human-readable part (first line only) in the result area.
+        first_line = message.splitlines()[0] if message else "Unknown error"
+        self.result_lbl.setHidden(False)
+        self.result_details_lbl.setHidden(False)
+        self.result_details_lbl.appendPlainText(f"⚠ Error: {first_line}")
 
     def _on_worker_finished(self) -> None:
         """Re-enable the button and display results when the worker is done."""
         self.button1.setEnabled(True)
         self.status_lbl.setHidden(True)
+        # Always hide the progress bar — a full-but-failed bar is misleading,
+        # and a max=0 bar shows a spurious indeterminate animation on failure.
+        self.pbar.setHidden(True)
+        self.pbar.setValue(0)
 
         if self.prop_data is not None and not self.prop_data.empty:
             self.button2.setHidden(False)
